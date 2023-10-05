@@ -1,0 +1,1 @@
+var t=new WebSocket(`ws://${location.host}`);t.onopen=()=>{setInterval(()=>t.send("ping"),5000),t.send("Hello from the client!")};t.onmessage=(d)=>{if(d.data==="reload")location.reload()};var e=document.getElementById("canvas"),g=e.getContext("2d");
