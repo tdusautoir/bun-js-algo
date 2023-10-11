@@ -131,3 +131,25 @@ function drawEmptyGrid() {
 
 drawEmptyGrid()
 drawDomains()
+
+let selectedCell: [number, number] | null = null
+
+canvas.addEventListener("mousemove", (event: MouseEvent) => {
+    event.stopPropagation()
+    const x = event.offsetX
+    const y = event.offsetY
+    const i = Math.min(Math.floor(x / cellSize), 8)
+    const j = Math.min(Math.floor(y / cellSize), 8)
+    if (selectedCell === null || selectedCell[0] !== i || selectedCell[1] !== j) {
+        selectedCell = [i, j]
+        console.log("Celulle sélectionnée:", selectedCell)
+    }
+})
+
+canvas.addEventListener("mouseout", (event: MouseEvent) => {
+    event.stopPropagation()
+    selectedCell = null
+    console.log("Celulle sélectionnée:", selectedCell)
+})
+
+console.log("Frontend chargé")
