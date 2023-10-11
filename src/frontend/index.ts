@@ -152,4 +152,75 @@ canvas.addEventListener("mouseout", (event: MouseEvent) => {
     console.log("Celulle sélectionnée:", selectedCell)
 })
 
+document.addEventListener("keydown", (event: KeyboardEvent) => {
+    const choiceKeys = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+    if (choiceKeys.includes(event.key) && selectedCell !== null) {
+        toggle(parseInt(event.key));
+    }
+});
+
+function toggle(v: number) {
+    const [i, j] = selectedCell!;
+
+    if (cellValues[j][i] === v) {
+        cellValues[j][i] = null;
+        addToDomains(i, j, v);
+    } else if (cellDomains[j][i].includes(v)) {
+        cellValues[j][i] = v;
+        removeFromDomains(i, j, v);
+    }
+
+    drawEmptyGrid();
+    drawDomains();
+}
+
+function removeFromDomains(i: number, j: number, v: number) {
+    for (let k = 0; k < 9; k++) {
+        const domainI = cellDomains[k][i];
+        const indexI = domainI.indexOf(v);
+        if (indexI > -1) {
+            domainI.splice(indexI, 1);
+        }
+
+        const domainJ = cellDomains[j][k];
+        const indexJ = domainJ.indexOf(v);
+        if (indexJ > -1) {
+            domainJ.splice(indexJ, 1);
+        }
+    }
+    const groupI = Math.floor(i / 3);
+    const groupJ = Math.floor(j / 3);
+    for (let k = 0; k < 3; k++) {
+        for (let l = 0; l < 3; l++) {
+            const domain = cellDomains[groupJ * 3 + k][groupI * 3 + l];
+            const index = domain.indexOf(v);
+            if (index > -1) {
+                domain.splice(index, 1);
+            }
+        }
+    }
+}
+
+function addToDomains(i: number, j: number, v: number) {
+    for (let k = 0; k < 9; k++) {
+        if (cellValues[k][i] === null && !cellDomains[k][i].includes(v)) {
+            cellDomains[k][i].push(v);
+        }
+        if (cellValues[j][k] === null && !cellDomains[j][k].includes(v)) {
+            cellDomains[j][k].push(v);
+        }
+    }
+    for (let k = 0; k < 3; k++) {
+        for (let l = 0; l < 3; l++) {
+            const groupI = Math.floor(i / 3);
+            const groupJ = Math.floor(j / 3);
+            const x = groupI * 3 + l;
+            const y = groupJ * 3 + k;
+            if (cellValues[y][x] === null && !cellDomains[y][x].includes(v)) {
+                cellDomains[y][x].push(v);
+            }
+        }
+    }
+}
+
 console.log("Frontend chargé")
