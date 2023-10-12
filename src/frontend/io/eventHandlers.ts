@@ -1,3 +1,4 @@
+import { possibleValue } from ".."
 import type { SudokuUI } from "./ui"
 
 type EventHandlersParams = {
@@ -6,7 +7,7 @@ type EventHandlersParams = {
 	readonly refreshGrid: () => void
 	readonly getSelectedCell: () => [number, number] | null
 	readonly setSelectedCell: (newCell: [number, number] | null) => void
-	readonly toggle: (v: number) => void
+	readonly toggle: (v: possibleValue) => void
 }
 
 export function eventHandlersInit(params: EventHandlersParams) {
@@ -22,19 +23,19 @@ export function eventHandlersInit(params: EventHandlersParams) {
 			params.refreshGrid()
 		}
 	}
-	
-	function canvasMouseOut (event: MouseEvent) {
+
+	function canvasMouseOut(event: MouseEvent) {
 		event.stopPropagation()
 		if (params.getSelectedCell() !== null) {
 			params.setSelectedCell(null)
 			params.refreshGrid()
 		}
 	}
-	
-	function keyUp (event: KeyboardEvent) {
+
+	function keyUp(event: KeyboardEvent) {
 		event.stopPropagation()
 		if (event.key >= "1" && event.key <= "9" && params.getSelectedCell() !== null) {
-			params.toggle(parseInt(event.key))
+			params.toggle(parseInt(event.key) as possibleValue)
 		}
 	}
 

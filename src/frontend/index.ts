@@ -1,11 +1,15 @@
 /// <reference lib="dom" />
 
 import { wsInit, SudokuUI, eventHandlersInit } from "./io"
+import { removeValue, type Domain, addValue } from "./io/domain"
+
+export type possibleValue = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+type CellDomain = Domain<possibleValue>
 
 type InitialState = {
 	readonly canvas: HTMLCanvasElement
 	readonly ui: SudokuUI
-	readonly cellDomains: number[][][]
+	readonly cellDomains: CellDomain[][]
 	readonly cellValues: (number | null)[][]
 }
 
@@ -19,7 +23,7 @@ function init(canvasId: string): InitialState | false {
 	if (!ui) {
 		return false
 	}
-	const cellDomains: number[][][] = []
+	const cellDomains: CellDomain[][] = []
 	const cellValues: (number | null)[][] = []
 	for (let j = 0; j < 9; j++) {
 		cellDomains.push([])
@@ -33,7 +37,7 @@ function init(canvasId: string): InitialState | false {
 }
 
 function start(initialState: InitialState) {
-	const {canvas, ui, cellDomains, cellValues} = initialState
+	const { canvas, ui, cellDomains, cellValues } = initialState
 	let selectedCell: [number, number] | null = null
 
 	function drawCellContent(i: number, j: number) {
@@ -52,25 +56,20 @@ function start(initialState: InitialState) {
 		}
 	}
 
-	function removeValueFromCellDomain(i: number, j: number, v: number) {
+	function removeValueFromCellDomain(i: number, j: number, v: possibleValue) {
 		const domain = cellDomains[j][i]
-		const valueIndex = domain.indexOf(v)
-		if (valueIndex !== -1) {
-			domain.splice(valueIndex, 1)
-		}
+		removeValue(domain, v);
 	}
 
-	function addValueToCellDomain(i: number, j: number, v: number) {
+	function addValueToCellDomain(i: number, j: number, v: possibleValue) {
 		const domain = cellDomains[j][i]
-		if (!domain.includes(v)) {
-			domain.push(v)
-		}
+		addValue(domain, v);
 	}
 
 	function maintainImpactedCellsDomain(
 		i: number,
 		j: number,
-		v: number,
+		v: possibleValue,
 		remove: boolean
 	) {
 		const action = remove ? removeValueFromCellDomain : addValueToCellDomain
@@ -84,7 +83,7 @@ function start(initialState: InitialState) {
 		}
 		const iGroup = Math.floor(i / 3)
 		const jGroup = Math.floor(j / 3)
-		for (let j2 = 0; j2 < 3 ; j2++) {
+		for (let j2 = 0; j2 < 3; j2++) {
 			for (let i2 = 0; i2 < 3; i2++) {
 				const iCell = iGroup * 3 + i2
 				const jCell = jGroup * 3 + j2
@@ -95,7 +94,7 @@ function start(initialState: InitialState) {
 		}
 	}
 
-	function toggle(v: number) {
+	function toggle(v: possibleValue) {
 		const i = selectedCell![0]
 		const j = selectedCell![1]
 		if (cellValues[j][i] === null) {
@@ -124,7 +123,8 @@ function start(initialState: InitialState) {
 		drawCellsContent()
 	}
 
-	eventHandlersInit({	canvas,	ui,	refreshGrid, toggle,
+	eventHandlersInit({
+		canvas, ui, refreshGrid, toggle,
 		getSelectedCell: () => selectedCell,
 		setSelectedCell: (newCell: [number, number] | null) => selectedCell = newCell,
 	})
