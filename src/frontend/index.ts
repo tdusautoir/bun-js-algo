@@ -1,16 +1,18 @@
 /// <reference lib="dom" />
 
 import { wsInit, SudokuUI, eventHandlersInit } from "./io"
-import { removeValue, type Domain, addValue, toJson } from "./io/domain"
+import { removeValue, type Domain, addValue, toJson, containsValue } from "./io/domain"
+import { Variable, setValue, unsetValue } from "./io/variable"
 
 export type possibleValue = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 type CellDomain = Domain<possibleValue>
+type CellValue = Variable<possibleValue | null>
 
 type InitialState = {
 	readonly canvas: HTMLCanvasElement
 	readonly ui: SudokuUI
 	readonly cellDomains: CellDomain[][]
-	readonly cellValues: (number | null)[][]
+	readonly cellValues: CellValue[][]
 }
 
 function init(canvasId: string): InitialState | false {
@@ -24,7 +26,7 @@ function init(canvasId: string): InitialState | false {
 		return false
 	}
 	const cellDomains: CellDomain[][] = []
-	const cellValues: (number | null)[][] = []
+	const cellValues: CellValue[][] = []
 	for (let j = 0; j < 9; j++) {
 		cellDomains.push([])
 		cellValues.push([])
@@ -98,7 +100,7 @@ function start(initialState: InitialState) {
 		const i = selectedCell![0]
 		const j = selectedCell![1]
 		if (cellValues[j][i] === null) {
-			if (cellDomains[j][i].includes(v)) {
+			if (containsValue(cellDomains[j][i], v)) {
 				cellValues[j][i] = v
 				maintainImpactedCellsDomain(i, j, v, true)
 				refreshGrid()
