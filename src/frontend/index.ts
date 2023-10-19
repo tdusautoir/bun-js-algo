@@ -1,7 +1,7 @@
 /// <reference lib="dom" />
 
 import { wsInit, SudokuUI, eventHandlersInit } from "./io"
-import { removeValue, type Domain, addValue } from "./io/domain"
+import { removeValue, type Domain, addValue, toJson } from "./io/domain"
 
 export type possibleValue = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 type CellDomain = Domain<possibleValue>

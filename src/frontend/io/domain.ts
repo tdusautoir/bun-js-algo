@@ -15,5 +15,16 @@ function addValue<T>(domain: Domain<T>, value: T): Domain<T> {
     return domain;
 }
 
+function containsValue<T>(domain: Domain<T>, value: T): boolean {
+    return domain.indexOf(value) !== -1;
+}
 
-export { Domain, removeValue, addValue }
+function toJson<T>(domain: Domain<T>): JSON {
+    return JSON.parse(JSON.stringify(domain));
+}
+
+function Copy<T>(domain: Domain<T>): Domain<T> {
+    return domain.slice();
+}
+
+export { Domain, removeValue, addValue, toJson, containsValue, Copy }
