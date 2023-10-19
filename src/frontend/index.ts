@@ -101,7 +101,7 @@ function start(initialState: InitialState) {
 		const j = selectedCell![1]
 		if (cellValues[j][i] === null) {
 			if (containsValue(cellDomains[j][i], v)) {
-				cellValues[j][i] = v
+				cellValues[j][i] = setValue(cellValues[j][i], v)
 				maintainImpactedCellsDomain(i, j, v, true)
 				refreshGrid()
 			}
