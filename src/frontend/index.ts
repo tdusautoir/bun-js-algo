@@ -1,18 +1,14 @@
 /// <reference lib="dom" />
 
 import { wsInit, SudokuUI, eventHandlersInit } from "./io"
-import { removeValue, type Domain, addValue, toJson, containsValue } from "./io/domain"
-import { Variable, setValue, unsetValue } from "./io/variable"
-
-export type possibleValue = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-type CellDomain = Domain<possibleValue>
-type CellValue = Variable<possibleValue | null>
+import type { SudokuValues, SudokuCell } from "./SudokuTypes"
+import { DomainImpl } from "./Domain"
+import { VariableImpl } from "./Variable"
 
 type InitialState = {
 	readonly canvas: HTMLCanvasElement
 	readonly ui: SudokuUI
-	readonly cellDomains: CellDomain[][]
-	readonly cellValues: CellValue[][]
+	readonly cellValues: SudokuCell[][]
 }
 
 function init(canvasId: string): InitialState | false {
@@ -25,28 +21,28 @@ function init(canvasId: string): InitialState | false {
 	if (!ui) {
 		return false
 	}
-	const cellDomains: CellDomain[][] = []
-	const cellValues: CellValue[][] = []
+	const cellValues: SudokuCell[][] = []
+	const sudokuDomain = new DomainImpl<SudokuValues>([1, 2, 3, 4, 5, 6, 7, 8, 9])
 	for (let j = 0; j < 9; j++) {
-		cellDomains.push([])
 		cellValues.push([])
 		for (let i = 0; i < 9; i++) {
-			cellDomains[j].push([1, 2, 3, 4, 5, 6, 7, 8, 9])
-			cellValues[j].push(null)
+			console.log(sudokuDomain.copy());
+			console.log(new VariableImpl<SudokuValues>(sudokuDomain.copy()));
+			cellValues[j].push(new VariableImpl<SudokuValues>(sudokuDomain.copy()))
 		}
 	}
-	return { canvas, ui, cellDomains, cellValues }
+	return { canvas, ui, cellValues }
 }
 
 function start(initialState: InitialState) {
-	const { canvas, ui, cellDomains, cellValues } = initialState
+	const { canvas, ui, cellValues } = initialState
 	let selectedCell: [number, number] | null = null
 
 	function drawCellContent(i: number, j: number) {
-		if (cellValues[j][i] !== null) {
-			ui.drawCellValue(i, j, cellValues[j][i]!)
+		if (cellValues[j][i].value !== undefined && cellValues[j][i].value) {
+			ui.drawCellValue(i, j, cellValues[j][i].value!)
 		} else {
-			ui.drawCellDomain(i, j, cellDomains[j][i])
+			ui.drawCellDomain(i, j, cellValues[j][i].domain)
 		}
 	}
 
@@ -58,20 +54,18 @@ function start(initialState: InitialState) {
 		}
 	}
 
-	function removeValueFromCellDomain(i: number, j: number, v: possibleValue) {
-		const domain = cellDomains[j][i]
-		removeValue(domain, v);
+	function removeValueFromCellDomain(i: number, j: number, v: SudokuValues) {
+		cellValues[j][i].domain.del(v)
 	}
 
-	function addValueToCellDomain(i: number, j: number, v: possibleValue) {
-		const domain = cellDomains[j][i]
-		addValue(domain, v);
+	function addValueToCellDomain(i: number, j: number, v: SudokuValues) {
+		cellValues[j][i].domain.add(v)
 	}
 
 	function maintainImpactedCellsDomain(
 		i: number,
 		j: number,
-		v: possibleValue,
+		v: SudokuValues,
 		remove: boolean
 	) {
 		const action = remove ? removeValueFromCellDomain : addValueToCellDomain
@@ -96,21 +90,21 @@ function start(initialState: InitialState) {
 		}
 	}
 
-	function toggle(v: possibleValue) {
+	function toggle(v: SudokuValues) {
 		const i = selectedCell![0]
 		const j = selectedCell![1]
-		if (cellValues[j][i] === null) {
-			if (containsValue(cellDomains[j][i], v)) {
-				cellValues[j][i] = setValue(cellValues[j][i], v)
+		if (cellValues[j][i].value === undefined || !cellValues[j][i].value) {
+			if (cellValues[j][i].domain.has(v)) {
+				cellValues[j][i].set(v)
 				maintainImpactedCellsDomain(i, j, v, true)
 				refreshGrid()
 			}
-		} else if (cellValues[j][i] === v) {
-			cellValues[j][i] = null
+		} else if (cellValues[j][i].value === v) {
+			cellValues[j][i].unset()
 			maintainImpactedCellsDomain(i, j, v, false)
 			for (let j2 = 0; j2 < 9; j2++) {
 				for (let i2 = 0; i2 < 9; i2++) {
-					if (cellValues[j2][i2] === v) {
+					if (cellValues[j2][i2].value === v) {
 						maintainImpactedCellsDomain(i2, j2, v, true)
 					}
 				}

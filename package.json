@@ -1,23 +1,20 @@
 {
   "name": "bun-js-algo",
-  "module": "index.ts",
+  "module": "src/index.ts",
   "type": "module",
-  "devDependencies": {
-    "@types/figlet": "^1.5.6",
-    "bun-types": "latest"
-  },
   "scripts": {
-    "start": "bun run src/index.ts",
-    "watch": "bun run --watch src/index.ts",
-    "hotwatch": "bun run --hot src/index.ts",
-    "start:backend": "bun run --watch src/backend/index.ts",
-    "build:frontend": "bun --minify build src/frontend/index.ts --outdir www/js",
-    "dev:frontend": "bun --minify build src/frontend/index.ts --outdir www/js --watch"
+    "start": "bun src/index.ts",
+    "dev": "bun --watch src/index.ts",
+    "start:backend": "bun run src/backend/index.ts",
+    "dev:backend": "bun --hot run src/backend/index.ts",
+    "build:front": "bun --minify build src/frontend/index.ts --outdir www/js",
+    "dev:front": "bun --minify --watch build src/frontend/index.ts --outdir www/js",
+    "ts:watch": "tsc --watch --noEmit"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "figlet": "^1.6.0"
   }
 }
